@@ -1,0 +1,10 @@
+ls
+ls
+git status
+ipython
+ls
+pylint
+which pylint
+flake8
+echo $PATH
+vim test_serializers.py 
