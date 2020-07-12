@@ -2,8 +2,12 @@ set runtimepath^=~/.vim/bundle/ctrlp.vim
 set guifont=Monaco\ 11
 set ignorecase
 set background=dark
-colo solarized
 set hlsearch
+
+set number relativenumber
+set nu rnu
+
+set laststatus=2
 
 call plug#begin('~/.vim/plugged')
 
@@ -21,3 +25,10 @@ augroup quickfix
     autocmd QuickFixCmdPost [^l]* cwindow
     autocmd QuickFixCmdPost l* lwindow
 augroup END
+
+set exrc
+set secure
+
+
+nnoremap <silent> <C-y> :CtrlPBuffer<CR>
+
