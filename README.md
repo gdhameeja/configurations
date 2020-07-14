@@ -9,3 +9,12 @@ Command to check the most affected files in a git repo
 - Ctrl-o goes back from tag (when you jump to definition)
 - Ctrl-w-o maximizes the window from the split
 
+## SQL tips
+- MySQL check the size of the database: 
+```
+SELECT table_name AS "Table",
+ROUND(((data_length + index_length) / 1024 / 1024), 2) AS "Size (MB)"
+FROM information_schema.TABLES
+WHERE table_schema = "database_name"
+ORDER BY (data_length + index_length) DESC;
+```
