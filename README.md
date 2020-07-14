@@ -18,3 +18,11 @@ FROM information_schema.TABLES
 WHERE table_schema = "database_name"
 ORDER BY (data_length + index_length) DESC;
 ```
+
+
+
+
+## Misc tips
+There is something called mosh, mobile interactive shell which is supposed to be better than ssh.
+I guess it also gives persistent ssh connections to servers even if network dies out and is more
+smooth than native ssh.
