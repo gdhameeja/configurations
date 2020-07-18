@@ -13,6 +13,9 @@ Remember ctags are better than etags. They give goto-definition for constants as
 ## VIM tips
 - Ctrl-o goes back from tag (when you jump to definition)
 - Ctrl-w-o maximizes the window from the split
+- Set tab width vim: `set shiftwidth=4 softtabstop=4 expandtab`
+- This is a good video on autoindent and tab width setting: https://www.youtube.com/watch?v=SfIiGkMLqug&t=175s
+- To refresh Ctrl-P cache (so that new files appear and deleted files don't) press F5 while in Ctrl-P window
 
 ## SQL tips
 - MySQL check the size of the database: 
