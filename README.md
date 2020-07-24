@@ -34,3 +34,4 @@ smooth than native ssh.
 
 - Generate a ctags file `find . -iname '*.py' -type f -exec ctags -e  -f TAGS {} +` for ctags for emacs and  `find . -iname '*.py' -type f -exec ctags -f <name of output your tags file> {} +` for tags file for vim
 - Append to a ctags file `find . -iname '*.py' -type f -exec ctags -aRe -f .<full path to the TAGS file with filename> {} +`
+- When CtrlP doesn't find all the files try this - `:let g:ctrlp_max_files=0` then run `:CtrlPClearAllCaches`. Also read the following issue for more help: https://github.com/kien/ctrlp.vim/issues/234
