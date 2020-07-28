@@ -1,6 +1,7 @@
 set runtimepath^=~/.vim/bundle/ctrlp.vim
 set guifont=Monaco\ 11
 set ignorecase
+colorscheme solarized
 set background=dark
 set hlsearch
 
@@ -32,3 +33,28 @@ set secure
 
 nnoremap <silent> <C-y> :CtrlPBuffer<CR>
 
+" for disabling toolbar in gvim
+
+set guioptions -=T
+
+
+" disable arrow keys
+noremap <Up> <Nop>
+noremap <Down> <Nop>
+noremap <Left> <Nop>
+noremap <Right> <Nop>
+
+inoremap <Up> <Nop>
+inoremap <Down> <Nop>
+inoremap <Left> <Nop>
+inoremap <Right> <Nop>
+
+
+" different colorscheme for gvim
+if has('gui_running')
+    " GUI colors
+    colorscheme solarized
+else
+    " Non-GUI (terminal) colors
+    colorscheme elflord
+endif
