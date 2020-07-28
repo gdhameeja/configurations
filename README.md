@@ -27,6 +27,10 @@ WHERE table_schema = "database_name"
 ORDER BY (data_length + index_length) DESC;
 ```
 
+## GIT tips
+- When you need to see the history of one line: `git log --pretty=short -u -L 56:<path to the file>`
+- This is obvious but `git log --reverse` shows the git log but in reverse
+
 ## Misc tips
 There is something called mosh, mobile interactive shell which is supposed to be better than ssh.
 I guess it also gives persistent ssh connections to servers even if network dies out and is more
@@ -35,3 +39,4 @@ smooth than native ssh.
 - Generate a ctags file `find . -iname '*.py' -type f -exec ctags -e  -f TAGS {} +` for ctags for emacs and  `find . -iname '*.py' -type f -exec ctags -f <name of output your tags file> {} +` for tags file for vim
 - Append to a ctags file `find . -iname '*.py' -type f -exec ctags -aRe -f .<full path to the TAGS file with filename> {} +`
 - When CtrlP doesn't find all the files try this - `:let g:ctrlp_max_files=0` then run `:CtrlPClearAllCaches`. Also read the following issue for more help: https://github.com/kien/ctrlp.vim/issues/234
+
