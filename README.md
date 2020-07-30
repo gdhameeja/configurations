@@ -15,7 +15,10 @@ Remember ctags are better than etags. They give goto-definition for constants as
 - Ctrl-w-o maximizes the window from the split
 - Set tab width vim: `set shiftwidth=4 softtabstop=4 expandtab`
 - This is a good video on autoindent and tab width setting: https://www.youtube.com/watch?v=SfIiGkMLqug&t=175s
+- When CtrlP doesn't find all the files try this - `:let g:ctrlp_max_files=0` then run `:CtrlPClearAllCaches`. Also read the following issue for more help: https://github.com/kien/ctrlp.vim/issues/234
 - To refresh Ctrl-P cache (so that new files appear and deleted files don't) press F5 while in Ctrl-P window
+- Generate a ctags file `find . -iname '*.py' -type f -exec ctags -e  -f TAGS {} +` for ctags for emacs and  `find . -iname '*.py' -type f -exec ctags -f <name of output your tags file> {} +` for tags file for vim
+- Append to a ctags file `find . -iname '*.py' -type f -exec ctags -aRe -f <full path to the TAGS file with filename> {} +`
 
 ## SQL tips
 - MySQL check the size of the database: 
@@ -35,8 +38,3 @@ ORDER BY (data_length + index_length) DESC;
 There is something called mosh, mobile interactive shell which is supposed to be better than ssh.
 I guess it also gives persistent ssh connections to servers even if network dies out and is more
 smooth than native ssh.
-
-- Generate a ctags file `find . -iname '*.py' -type f -exec ctags -e  -f TAGS {} +` for ctags for emacs and  `find . -iname '*.py' -type f -exec ctags -f <name of output your tags file> {} +` for tags file for vim
-- Append to a ctags file `find . -iname '*.py' -type f -exec ctags -aRe -f .<full path to the TAGS file with filename> {} +`
-- When CtrlP doesn't find all the files try this - `:let g:ctrlp_max_files=0` then run `:CtrlPClearAllCaches`. Also read the following issue for more help: https://github.com/kien/ctrlp.vim/issues/234
-
