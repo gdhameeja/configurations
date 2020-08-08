@@ -31,10 +31,12 @@ ORDER BY (data_length + index_length) DESC;
 ```
 
 ## GIT tips
-- When you need to see the history of one line: `git log --pretty=short -u -L 56:<path to the file>`
+- When you need to see the history of one line: `git log --pretty=short -u -L 56:<path to the file>` See the following link for more details: https://stackoverflow.com/questions/8435343/retrieve-the-commit-log-for-a-specific-line-in-a-file
+- Git blame for specific lines of a file: `git blame -L <starting line number:ending line number (maybe relative to starting line number)> -- <path to file>
 - This is obvious but `git log --reverse` shows the git log but in reverse
 
 ## Misc tips
 There is something called mosh, mobile interactive shell which is supposed to be better than ssh.
 I guess it also gives persistent ssh connections to servers even if network dies out and is more
 smooth than native ssh.
+- To increase the speed of the typing cursor (the one that appears when you type) use the following command: xset r rate 250 50
