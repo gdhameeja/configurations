@@ -1,16 +1,11 @@
 ## NOTES
-This is the command to be added to .bashrc/.profile to make ag results output in a pager like less
-alias ag='ag --pager "less -R"'
 
-git log --pretty=format: --name-only | sort | uniq -c | sort -rg | head -10
-Command to check the most affected files in a git repo
-
-## EMACS tips
+### EMACS tips
 - Generate ctags for emacs with following command:
 `find . -iname '*.py' -type f -exec ctags -e  -f TAGS {} +`
 Remember ctags are better than etags. They give goto-definition for constants as well whereas etags don't seem to do so.
 
-## VIM tips
+### VIM tips
 - Ctrl-o goes back from tag (when you jump to definition)
 - Ctrl-w-o maximizes the window from the split
 - Set tab width vim: `set shiftwidth=4 softtabstop=4 expandtab`
@@ -20,7 +15,7 @@ Remember ctags are better than etags. They give goto-definition for constants as
 - Generate a ctags file `find . -iname '*.py' -type f -exec ctags -e  -f TAGS {} +` for ctags for emacs and  `find . -iname '*.py' -type f -exec ctags -f <name of output your tags file> {} +` for tags file for vim
 - Append to a ctags file `find . -iname '*.py' -type f -exec ctags -aRe -f <full path to the TAGS file with filename> {} +`
 
-## SQL tips
+### SQL tips
 - MySQL check the size of the database: 
 ```
 SELECT table_name AS "Table",
@@ -30,13 +25,17 @@ WHERE table_schema = "database_name"
 ORDER BY (data_length + index_length) DESC;
 ```
 
-## GIT tips
+### GIT tips
 - When you need to see the history of one line: `git log --pretty=short -u -L 56:<path to the file>` See the following link for more details: https://stackoverflow.com/questions/8435343/retrieve-the-commit-log-for-a-specific-line-in-a-file
 - Git blame for specific lines of a file: `git blame -L <starting line number:ending line number (maybe relative to starting line number)> -- <path to file>
 - This is obvious but `git log --reverse` shows the git log but in reverse
+- git log --pretty=format: --name-only | sort | uniq -c | sort -rg | head -10 Command to check the most affected files in a git repo
 
-## Misc tips
+### Misc tips
 There is something called mosh, mobile interactive shell which is supposed to be better than ssh.
 I guess it also gives persistent ssh connections to servers even if network dies out and is more
 smooth than native ssh.
+- This is the command to be added to .bashrc/.profile to make ag results output in a pager like less
+alias ag='ag --pager "less -R"'
+
 - To increase the speed of the typing cursor (the one that appears when you type) use the following command: xset r rate 250 50
