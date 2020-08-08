@@ -14,6 +14,7 @@ Remember ctags are better than etags. They give goto-definition for constants as
 - To refresh Ctrl-P cache (so that new files appear and deleted files don't) press F5 while in Ctrl-P window
 - Generate a ctags file `find . -iname '*.py' -type f -exec ctags -e  -f TAGS {} +` for ctags for emacs and  `find . -iname '*.py' -type f -exec ctags -f <name of output your tags file> {} +` for tags file for vim
 - Append to a ctags file `find . -iname '*.py' -type f -exec ctags -aRe -f <full path to the TAGS file with filename> {} +`
+- To replace in visual mode: Select lines where you want to replace. Then `:s/<text to replace>/<new text>/`
 
 ### SQL tips
 - MySQL check the size of the database: 
