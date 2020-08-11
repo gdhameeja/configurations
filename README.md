@@ -15,6 +15,7 @@ Remember ctags are better than etags. They give goto-definition for constants as
 - Generate a ctags file `find . -iname '*.py' -type f -exec ctags -e  -f TAGS {} +` for ctags for emacs and  `find . -iname '*.py' -type f -exec ctags -f <name of output your tags file> {} +` for tags file for vim
 - Append to a ctags file `find . -iname '*.py' -type f -exec ctags -aRe -f <full path to the TAGS file with filename> {} +`
 - To replace in visual mode: Select lines where you want to replace. Then `:s/<text to replace>/<new text>/`
+- If you have recently installed ctrlp or something, use this command to make ctrlp run: `:helptags ~/.vim/bundle/ctrlp.vim/doc` assuming you have doc in the specified location
 
 ### SQL tips
 - MySQL check the size of the database: 
