@@ -32,6 +32,8 @@ ORDER BY (data_length + index_length) DESC;
 - Git blame for specific lines of a file: `git blame -L <starting line number:ending line number (maybe relative to starting line number)> -- <path to file>
 - This is obvious but `git log --reverse` shows the git log but in reverse
 - git log --pretty=format: --name-only | sort | uniq -c | sort -rg | head -10 Command to check the most affected files in a git repo
+- To increase the speed of the typing cursor (the one that appears when you type) use the following command: xset r rate 250 50
+- When you have to change the name/email of a specific commit: https://stackoverflow.com/questions/3042437/how-to-change-the-commit-author-for-one-specific-commit - basically `git rebase -i <commit-before-the-commit-to-edit>` and change `pick` to `edit` for the commit to be edited. Then use `git commit --amend --author="Author name <authoremail>" --no-edit`. Then run `git rebase --continue`. Repeat the last two steps for every commit to be edited.
 
 ### Misc tips
 There is something called mosh, mobile interactive shell which is supposed to be better than ssh.
@@ -39,5 +41,3 @@ I guess it also gives persistent ssh connections to servers even if network dies
 smooth than native ssh.
 - This is the command to be added to .bashrc/.profile to make ag results output in a pager like less
 alias ag='ag --pager "less -R"'
-
-- To increase the speed of the typing cursor (the one that appears when you type) use the following command: xset r rate 250 50
