@@ -41,3 +41,4 @@ I guess it also gives persistent ssh connections to servers even if network dies
 smooth than native ssh.
 - This is the command to be added to .bashrc/.profile to make ag results output in a pager like less
 alias ag='ag --pager "less -R"'
+- Gogh - the color themes thing for bash: https://mayccoll.github.io/Gogh/ you use to use this a lot
