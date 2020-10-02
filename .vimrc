@@ -30,11 +30,10 @@ augroup END
 set exrc
 set secure
 
-
+" open list of already open buffers
 nnoremap <silent> <C-y> :CtrlPBuffer<CR>
 
 " for disabling toolbar in gvim
-
 set guioptions -=T
 
 
@@ -58,3 +57,8 @@ else
     " Non-GUI (terminal) colors
     colorscheme elflord
 endif
+
+
+" run goimports on save
+Plug 'mattn/vim-goimports'
+
