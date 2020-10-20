@@ -35,6 +35,7 @@ ORDER BY (data_length + index_length) DESC;
 - To increase the speed of the typing cursor (the one that appears when you type) use the following command: xset r rate 250 50
 - When you have to change the name/email of a specific commit: https://stackoverflow.com/questions/3042437/how-to-change-the-commit-author-for-one-specific-commit - basically `git rebase -i <commit-before-the-commit-to-edit>` and change `pick` to `edit` for the commit to be edited. Then use `git commit --amend --author="Author name <authoremail>" --no-edit`. Then run `git rebase --continue`. Repeat the last two steps for every commit to be edited.
 - Search a string in git commits (using git log) with filename and commit details. `git log -S'search string' --oneline --name-status`. Check this answer https://gist.github.com/lyoshenka/8251914.
+- Having a global `.gitignore` to ignore stuff from all repositories on machine: https://sebastiandedeyne.com/setting-up-a-global-gitignore-file/ (this is what you use to exclude tags and .vimrc files from individual repositories)
 
 ### Misc tips
 There is something called mosh, mobile interactive shell which is supposed to be better than ssh.
