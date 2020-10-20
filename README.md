@@ -44,4 +44,6 @@ smooth than native ssh.
 - This is the command to be added to .bashrc/.profile to make ag results output in a pager like less
 alias ag='ag --pager "less -R"'
 - Gogh - the color themes thing for bash: https://mayccoll.github.io/Gogh/ you use to use this a lot
-- To increase the speed of the keybaord cursor (the one because of which your keybaord cursor moves fast while moving around in vim or any other editor): `xset r rate 300 25` https://www.reddit.com/r/vim/comments/1lvg52/speed_up_your_keyboard_xset_r_rate/ refer this link for more info
+- To increase the speed of the keybaord cursor (the one because of which your keybaord cursor moves fast while moving around in vim or any other editor): `xset r rate 600 100` https://www.reddit.com/r/vim/comments/1lvg52/speed_up_your_keyboard_xset_r_rate/ refer this link for more info
+- `xset -q` checks the current rate for keyboard cursor (check values `auto repeat delay` and `repeat rate`)
+- `xset r rate` sets the values to default for keyboard cursor
