@@ -4,6 +4,7 @@ set ignorecase
 colorscheme solarized
 set background=dark
 set hlsearch
+set incsearch
 
 set number relativenumber
 set nu rnu
@@ -13,6 +14,9 @@ set laststatus=2
 call plug#begin('~/.vim/plugged')
 
 Plug 'https://github.com/rking/ag.vim.git' 
+
+" run goimports on save
+Plug 'mattn/vim-goimports'
 call plug#end()
 
 
@@ -57,8 +61,3 @@ else
     " Non-GUI (terminal) colors
     colorscheme elflord
 endif
-
-
-" run goimports on save
-Plug 'mattn/vim-goimports'
-
