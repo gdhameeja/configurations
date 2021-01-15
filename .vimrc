@@ -1,7 +1,6 @@
 set runtimepath^=~/.vim/bundle/ctrlp.vim
-set guifont=Monaco\ 11
+set guifont=Monaco\ 10
 set ignorecase
-colorscheme solarized
 set background=dark
 set hlsearch
 set incsearch
@@ -14,6 +13,12 @@ set laststatus=2
 call plug#begin('~/.vim/plugged')
 
 Plug 'https://github.com/rking/ag.vim.git' 
+
+" go dev environment
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+
+" one dark theme vim
+Plug 'https://github.com/joshdick/onedark.vim.git'
 
 " run goimports on save
 Plug 'mattn/vim-goimports'
@@ -40,6 +45,9 @@ nnoremap <silent> <C-y> :CtrlPBuffer<CR>
 " for disabling toolbar in gvim
 set guioptions -=T
 
+" for disabling menu bar in gvim
+set guioptions -=m
+
 
 " disable arrow keys
 noremap <Up> <Nop>
@@ -56,8 +64,11 @@ inoremap <Right> <Nop>
 " different colorscheme for gvim
 if has('gui_running')
     " GUI colors
-    colorscheme solarized
+    colorscheme visualstudio
 else
     " Non-GUI (terminal) colors
-    colorscheme elflord
+    colorscheme default
 endif
+
+" run goimports on every save
+let g:go_fmt_command = "goimports"
