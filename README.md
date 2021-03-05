@@ -50,3 +50,4 @@ alias ag='ag --pager "less -R"'
 - `xset -q` checks the current rate for keyboard cursor (check values `auto repeat delay` and `repeat rate`)
 - `xset r rate` sets the values to default for keyboard cursor
 - find and grep : `find . -iname '*.py' -type f -print0 | xargs -0 grep -n <string to grep>`. You could also do `grep -Rn --include="*.py" <string to grep>` but the first command helps you to include things like grep all files modified 5 days ago or grep all the files owned by user or group or grep all files modified on this date
+- To delete last blank line in a number of files: `find . -iname '*.dart' -type f -exec sed -i '${/^$/d;}' {} \;`. Here replace <.dart> with the file extension or play around with find conditions
