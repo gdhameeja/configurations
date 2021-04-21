@@ -39,6 +39,13 @@ ORDER BY (data_length + index_length) DESC;
 - Search a string in git commits (using git log) with filename and commit details. `git log -S'search string' --oneline --name-status`. Check this answer https://gist.github.com/lyoshenka/8251914.
 - Having a global `.gitignore` to ignore stuff from all repositories on machine: https://sebastiandedeyne.com/setting-up-a-global-gitignore-file/ (this is what you use to exclude tags and .vimrc files from individual repositories)
 - `cd $(git rev-parse --show-toplevel)` can be used to jump to the root of the current git repoistory. In .bashrc, use `alias gr='cd $(git rev-parse --show-toplevel)'` to use `gr` command in any git repository to go to the root of the repository. 
+- Merge all commits on a branch - https://stackoverflow.com/questions/25356810/git-how-to-squash-all-commits-on-branch
+  ```
+  git checkout yourBranch
+  git reset $(git merge-base master yourBranch)
+  git add .
+  git commit -m "one commit on your branch"
+  ```
 
 ### Misc tips
 There is something called mosh, mobile interactive shell which is supposed to be better than ssh.
