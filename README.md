@@ -30,7 +30,7 @@ ORDER BY (data_length + index_length) DESC;
 ```
 
 ### GIT tips
-- When you need to see the history of one line: `git log --pretty=short -u -L 56:<path to the file>` See the following link for more details: https://stackoverflow.com/questions/8435343/retrieve-the-commit-log-for-a-specific-line-in-a-file
+- When you need to see the history of one line: `git log --pretty=short -u -L 56,+1:<path to the file>`. Here `+1` means just this line. We could use anything in place of `+1`. See the following link for more details: https://stackoverflow.com/questions/8435343/retrieve-the-commit-log-for-a-specific-line-in-a-file or https://stackoverflow.com/questions/50469927/view-git-history-of-specific-line
 - Git blame for specific lines of a file: `git blame -L <starting line number:ending line number (maybe relative to starting line number)> -- <path to file>
 - This is obvious but `git log --reverse` shows the git log but in reverse
 - git log --pretty=format: --name-only | sort | uniq -c | sort -rg | head -10 Command to check the most affected files in a git repo
@@ -39,6 +39,13 @@ ORDER BY (data_length + index_length) DESC;
 - Search a string in git commits (using git log) with filename and commit details. `git log -S'search string' --oneline --name-status`. Check this answer https://gist.github.com/lyoshenka/8251914.
 - Having a global `.gitignore` to ignore stuff from all repositories on machine: https://sebastiandedeyne.com/setting-up-a-global-gitignore-file/ (this is what you use to exclude tags and .vimrc files from individual repositories)
 - `cd $(git rev-parse --show-toplevel)` can be used to jump to the root of the current git repoistory. In .bashrc, use `alias gr='cd $(git rev-parse --show-toplevel)'` to use `gr` command in any git repository to go to the root of the repository. 
+- Merge all commits on a branch - https://stackoverflow.com/questions/25356810/git-how-to-squash-all-commits-on-branch
+  ```
+  git checkout yourBranch
+  git reset $(git merge-base master yourBranch)
+  git add .
+  git commit -m "one commit on your branch"
+  ```
 
 ### Misc tips
 There is something called mosh, mobile interactive shell which is supposed to be better than ssh.
@@ -53,3 +60,5 @@ alias ag='ag --pager "less -R"'
 - find and grep : `find . -iname '*.py' -type f -print0 | xargs -0 grep -n <string to grep>`. You could also do `grep -Rn --include="*.py" <string to grep>` but the first command helps you to include things like grep all files modified 5 days ago or grep all the files owned by user or group or grep all files modified on this date
 - To delete last blank line in a number of files: `find . -iname '*.dart' -type f -exec sed -i '${/^$/d;}' {} \;`. Here replace <.dart> with the file extension or play around with find conditions
 - To search with `ag` in files with filenames matching a particular pattern use `ag -G <pattern> <word to search>` Ex: `ag -G 'instrument' 'uri'`
+- To list all the files containing pattern with ag - `ag -g <pattern>`
+- Easy way of using grep - `grep -ri <pattern to search> *` or if you know the directory to search `grep -ri <pattern to search> <name of the directory>`. Can be used when you don't have access to ag-silversearcher.
