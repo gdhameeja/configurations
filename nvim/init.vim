@@ -1,86 +1,35 @@
-set runtimepath^=~/.vim/bundle/ctrlp.vim
-set guifont=Monaco\ 10
+set runtimepath^=~/.config/nvim/bundle/ctrlp.vim
+
 set ignorecase
 set background=dark
 set hlsearch
 set incsearch
 
-set number relativenumber
-set nu rnu
-
-set laststatus=2
+set number
 
 call plug#begin('~/.vim/plugged')
 
-Plug 'https://github.com/rking/ag.vim.git' 
+" < Other Plugins, if they exist >
 
-" go dev environment
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
-
-" autocompletion conquer of completion
-Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
-
-
-" one dark theme vim
-Plug 'https://github.com/joshdick/onedark.vim.git'
-
-" run goimports on save
-Plug 'mattn/vim-goimports'
+Plug 'fatih/vim-go'
+Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
 
 " colorschemes
 Plug 'morhetz/gruvbox'
 Plug 'overcache/NeoSolarized'
-Plug 'rakr/vim-one'
+Plug 'preservim/NERDTree'
+Plug 'rafi/awesome-vim-colorschemes'
+Plug 'tpope/vim-fugitive'
+
+" psql client
+Plug 'lifepillar/pgsql.vim'
 
 call plug#end()
 
-
-if executable("ag")
-set grepprg=ag\ --ignore-case\ --no-color\ -G\ .py
-set grepformat=%f:%l:%c:%m,%f:%l:%m
-endif
-
-augroup quickfix
-    autocmd!
-    autocmd QuickFixCmdPost [^l]* cwindow
-    autocmd QuickFixCmdPost l* lwindow
-augroup END
-
-set exrc
-set secure
-
-" open list of already open buffers
 nnoremap <silent> <C-y> :CtrlPBuffer<CR>
 
-
-" disable arrow keys
-noremap <Up> <Nop>
-noremap <Down> <Nop>
-noremap <Left> <Nop>
-noremap <Right> <Nop>
-
-inoremap <Up> <Nop>
-inoremap <Down> <Nop>
-inoremap <Left> <Nop>
-inoremap <Right> <Nop>
-
-
-" different colorscheme for gvim
-if has('gui_running')
-    " GUI colors
-    colorscheme monokai
-else
-    " Non-GUI (terminal) colors
-    set termguicolors
-    colorscheme onedark
-    set background=dark
-endif
-
-" run goimports on every save
-let g:go_fmt_command = "goimports"
-
-
-
+" set colorscheme
+colorscheme gruvbox
 
 
 " -------------------------------------------------------------------------------------------------
@@ -98,5 +47,78 @@ set shortmess+=c
 " always show signcolumns
 set signcolumn=yes
 
+" Use tab for trigger completion with characters ahead and navigate.
+" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
 " Use <c-space> to trigger completion.
 inoremap <silent><expr> <c-space> coc#refresh()
+
+" Use `[c` and `]c` to navigate diagnostics
+" nmap <silent> [c <Plug>(coc-diagnostic-prev)
+" nmap <silent> ]c <Plug>(coc-diagnostic-next)
+
+" Remap keys for gotos
+" nmap <silent> gd <Plug>(coc-definition)
+" nmap <silent> gy <Plug>(coc-type-definition)
+" nmap <silent> gi <Plug>(coc-implementation)
+" nmap <silent> gr <Plug>(coc-references)
+
+" Use U to show documentation in preview window
+nnoremap <silent> U :call <SID>show_documentation()<CR>
+
+" Remap for rename current word
+nmap <leader>rn <Plug>(coc-rename)
+
+" Remap for format selected region
+" vmap <leader>f  <Plug>(coc-format-selected)
+" nmap <leader>f  <Plug>(coc-format-selected)
+" Show all diagnostics
+" nnoremap <silent> <space>a  :<C-u>CocList diagnostics<cr>
+" Manage extensions
+" nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
+" Show commands
+" nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
+" Find symbol of current document
+" nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
+" Search workspace symbols
+" nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
+" Do default action for next item.
+" nnoremap <silent> <space>j  :<C-u>CocNext<CR>
+" Do default action for previous item.
+" nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
+" Resume latest coc list
+nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
+
+
+" disable vim-go :GoDef short cut (gd)
+" this is handled by LanguageClient [LC]
+" let g:go_def_mapping_enabled = 0
+
+" grep command vim
+set grepprg=ag\ --vimgrep
+
+function! Grep(...)
+        return system(join([&grepprg] + [expand(join(a:000, ' '))], ' '))
+endfunction
+
+command! -nargs=+ -complete=file_in_path -bar Grep  cgetexpr Grep(<f-args>)
+command! -nargs=+ -complete=file_in_path -bar LGrep lgetexpr Grep(<f-args>)
+
+cnoreabbrev <expr> grep  (getcmdtype() ==# ':' && getcmdline() ==# 'grep')  ? 'Grep'  : 'grep'
+cnoreabbrev <expr> lgrep (getcmdtype() ==# ':' && getcmdline() ==# 'lgrep') ? 'LGrep' : 'lgrep'
+
+augroup quickfix
+        autocmd!
+        autocmd QuickFixCmdPost cgetexpr cwindow
+        autocmd QuickFixCmdPost lgetexpr lwindow
+augroup END
