@@ -1,0 +1,7 @@
+{
+    "workbench.colorTheme": "Vim Dark Hard",
+    "vim.hlsearch": true,                      // vim highlight search
+    "vim.searchHighlightTextColor": "#FFFF00",    // vim highlight search color
+    "workbench.editor.revealIfOpen": true,    
+    "search.mode": "reuseEditor"   // search editor like sublime text
+}
