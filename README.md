@@ -46,6 +46,7 @@ ORDER BY (data_length + index_length) DESC;
   git add .
   git commit -m "one commit on your branch"
   ```
+- Grep in all branches and all commits of entire project `git grep <regexp> $(git rev-list --all)`
 
 ### Misc tips
 There is something called mosh, mobile interactive shell which is supposed to be better than ssh.
@@ -62,3 +63,4 @@ alias ag='ag --pager "less -R"'
 - To search with `ag` in files with filenames matching a particular pattern use `ag -G <pattern> <word to search>` Ex: `ag -G 'instrument' 'uri'`
 - To list all the files containing pattern with ag - `ag -g <pattern>`
 - Easy way of using grep - `grep -ri <pattern to search> *` or if you know the directory to search `grep -ri <pattern to search> <name of the directory>`. Can be used when you don't have access to ag-silversearcher.
+- To delete files that result in the `find` command instead of `find . -iname '*.java' -type f -exec rm -rf {} \;` we can do `find . -iname '*.java' -type f -delete`
