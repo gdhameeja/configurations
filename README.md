@@ -67,3 +67,4 @@ alias ag='ag --pager "less -R"'
 - To navigate to the directory of a file using `fzf` - `$ cd $(dirname $(fzf))`
 - Refactoring using command line; search the files that contain the symbol to replace and run sed to refactor: `ag -l ActiveRecord | xargs sed -i '' 's/ActiveRecord/ActiveDoom/'`
 - `ranger` excellent tool to work with lots of files and directories. And in `ranger` to create a new file that you can edit immediately: use the `edit` command like this: `:edit new_file_name`
+- For more command line tools, tips and tricks refer this page: https://github.com/alebcay/awesome-shell
