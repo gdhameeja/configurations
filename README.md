@@ -65,3 +65,5 @@ alias ag='ag --pager "less -R"'
 - Easy way of using grep - `grep -ri <pattern to search> *` or if you know the directory to search `grep -ri <pattern to search> <name of the directory>`. Can be used when you don't have access to ag-silversearcher.
 - To delete files that result in the `find` command instead of `find . -iname '*.java' -type f -exec rm -rf {} \;` we can do `find . -iname '*.java' -type f -delete`
 - To navigate to the directory of a file using `fzf` - `$ cd $(dirname $(fzf))`
+- Refactoring using command line; search the files that contain the symbol to replace and run sed to refactor: `ag -l ActiveRecord | xargs sed -i '' 's/ActiveRecord/ActiveDoom/'`
+- `ranger` excellent tool to work with lots of files and directories
