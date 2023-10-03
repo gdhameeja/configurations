@@ -1,0 +1,61 @@
+function! RunSqlSelection() 
+
+    " Get the selected lines and join them into a single string 
+
+    let l:query = join(getline("'<", "'>"), "\n") 
+
+  
+
+    let l:host = "learn_db"  " Replace 'mysql-container' with your Docker container name or IP 
+
+    let l:user = "root"  " Replace 'your_mysql_user' with your MySQL username 
+
+    let l:password = "pass"  " Replace 'your_mysql_password' with your MySQL password 
+
+    let l:database = "bank"  " Replace 'your_database_name' with your MySQL database name 
+
+  
+
+    let l:cmd = "sudo docker exec -i " . l:host . " mysql --binary-mode=1 -u " . l:user . " -p" . l:password . " " . l:database 
+
+  
+
+    " Create a new buffer with the SQL query and run the command 
+
+    let l:tmpfile = tempname() 
+
+    call writefile([l:query], l:tmpfile) 
+
+  
+
+    " Use a temporary file to store the SQL query 
+
+    let l:tmpfile = tempname() 
+
+    call writefile(split(l:query, '\n'), l:tmpfile) 
+
+  
+
+    " Run the command with the SQL query 
+
+    let l:output = system(l:cmd . " < " . shellescape(l:tmpfile) . " | column -t -s '\t'") 
+
+  
+
+    call delete(l:tmpfile) 
+
+  
+
+    " Open a new window and display the output 
+
+    below new 
+
+    setlocal buftype=nofile bufhidden=wipe noswapfile 
+
+    call setline(1, split(l:output, "\n")) 
+
+endfunction 
+
+  
+
+command! -range=% Runsql :<line1>,<line2>call RunSqlSelection() 

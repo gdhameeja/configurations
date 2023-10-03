@@ -1,0 +1,63 @@
+function! RunPythonSelection() 
+
+    " Get the selected lines and join them into a single string 
+
+    let l:code = join(getline("'<", "'>"), "\n") 
+
+  
+
+    " Create a temporary directory 
+
+    let l:tempdir = tempname() 
+
+  
+
+    " Define the Python source file path within the temporary directory 
+
+    let l:tmpfile = l:tempdir . "/myProgram.py" 
+
+    call mkdir(l:tempdir) 
+
+  
+
+    " Use echo to write the selected Python code to the temporary .py file 
+
+    let l:echo_cmd = "echo " . shellescape(l:code) . " > " . shellescape(l:tmpfile) 
+
+    call system(l:echo_cmd) 
+
+  
+
+    " Define the Python run command 
+
+    let l:python_cmd = "python3 " . shellescape(l:tmpfile) 
+
+  
+
+    " Run the Python code using an external shell command 
+
+    let l:output = system(l:python_cmd) 
+
+  
+
+    " Clean up the temporary directory and its contents 
+
+    call delete(l:tmpfile) 
+
+    call delete(l:tempdir) 
+
+  
+
+    " Open a new window and display the output 
+
+    below new 
+
+    setlocal buftype=nofile bufhidden=wipe noswapfile 
+
+    call setline(1, split(l:output, "\n")) 
+
+endfunction 
+
+  
+
+command! -range=% Runpy :<line1>,<line2>call RunPythonSelection() 

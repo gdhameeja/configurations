@@ -1,0 +1,69 @@
+function! RunGoSelection() 
+
+    " Get the selected lines and join them into a single string 
+
+    let l:code = join(getline("'<", "'>"), "\n") 
+
+  
+
+    " Prepend 'package main' and 'import "fmt"' to the selected Go code 
+
+    let l:code = 'package main' . "\n" . 'import "fmt"' . "\n" . l:code 
+
+  
+
+    " Create a temporary directory 
+
+    let l:tempdir = tempname() 
+
+  
+
+    " Define the Go source file path within the temporary directory 
+
+    let l:tmpfile = l:tempdir . "/myProgram.go" 
+
+    call mkdir(l:tempdir) 
+
+  
+
+    " Use echo to write the selected Go code to the temporary .go file 
+
+    let l:echo_cmd = "echo " . shellescape(l:code) . " > " . shellescape(l:tmpfile) 
+
+    call system(l:echo_cmd) 
+
+  
+
+    " Define the Go run command 
+
+    let l:go_cmd = "go run " . shellescape(l:tmpfile) 
+
+  
+
+    " Run the Go code using an external shell command 
+
+    let l:output = system(l:go_cmd) 
+
+  
+
+    " Clean up the temporary directory and its contents 
+
+    call delete(l:tmpfile) 
+
+    call delete(l:tempdir) 
+
+  
+
+    " Open a new window and display the output 
+
+    below new 
+
+    setlocal buftype=nofile bufhidden=wipe noswapfile 
+
+    call setline(1, split(l:output, "\n")) 
+
+endfunction 
+
+  
+
+command! -range=% Rg :<line1>,<line2>call RunGoSelection() 
