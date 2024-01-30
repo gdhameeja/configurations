@@ -4,4 +4,7 @@
     "vim.searchHighlightTextColor": "#FFFF00",    // vim highlight search color
     "workbench.editor.revealIfOpen": true,    
     "search.mode": "reuseEditor"   // search editor like sublime text
+    "vim.handleKeys": {
+        "<C-i>": false      // this is done because copilot uses Ctrl+i to do inline chat; so remove this shortcut from vim
+    }
 }
