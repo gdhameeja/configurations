@@ -1,0 +1,116 @@
+" Database connection settings
+let g:db_host = "192.168.53.151"     " Database host
+let g:db_port = "5432"          " Database port
+let g:db_user = "cbownr"          " Database username
+let g:db_password = "CB0$n6OnW!6r@B02A"   " Database password
+let g:db_name = "cbadmin"          " Database name
+
+function! SumList(list)
+    let l:sum = 0
+    for l:item in a:list
+        let l:sum += l:item
+    endfor
+    return l:sum
+endfunction
+
+function! FormatSqlOutput(output)
+    " Split output into lines
+    let l:lines = split(a:output, '\n')
+    if len(l:lines) == 0
+        return ["No results"]
+    endif
+
+    " First line should contain column names
+    let l:header = l:lines[0]
+    let l:data = l:lines[1:]
+
+    " Calculate column widths
+    let l:columns = split(l:header, '\t')
+    let l:widths = map(copy(l:columns), 'len(v:val)')
+
+    for l:line in l:data
+        let l:fields = split(l:line, '\t')
+        let l:i = 0
+        for l:field in l:fields
+            if l:i < len(l:widths)
+                let l:widths[l:i] = max([l:widths[l:i], len(l:field)])
+            endif
+            let l:i += 1
+        endfor
+    endfor
+
+    " Initialize formatted list
+    let l:formatted = []
+
+    " Calculate total width for separator line
+    let l:total_width = SumList(l:widths) + 3 * len(l:widths) - 1
+
+    " Format header
+    call add(l:formatted, repeat('=', l:total_width))
+    let l:header_fields = split(l:header, '\t')
+    let l:header_line = ''
+    let l:i = 0
+    for l:field in l:header_fields
+        let l:header_line .= printf('%-*s | ', l:widths[l:i], l:field)
+        let l:i += 1
+    endfor
+    call add(l:formatted, l:header_line[:-3])
+    call add(l:formatted, repeat('=', l:total_width))
+
+    " Format data
+    for l:line in l:data
+        let l:fields = split(l:line, '\t')
+        let l:formatted_line = ''
+        let l:i = 0
+        for l:field in l:fields
+            if l:i < len(l:widths)
+                let l:formatted_line .= printf('%-*s | ', l:widths[l:i], l:field)
+            endif
+            let l:i += 1
+        endfor
+        call add(l:formatted, l:formatted_line[:-3])
+    endfor
+    call add(l:formatted, repeat('=', l:total_width))
+
+    return l:formatted
+endfunction
+
+function! RunSqlSelection() range
+    " Get the selected lines and join them into a single string
+    let l:query = join(getline(a:firstline, a:lastline), " ")
+
+    " Set PGPASSWORD environment variable for authentication
+    let $PGPASSWORD = g:db_password
+
+    " Build psql command with headers
+    let l:cmd = "psql -h " . g:db_host . " -p " . g:db_port . " -U " . g:db_user . " -d " . g:db_name . " -A -F $'\t' -c " . shellescape(l:query)
+
+    " Run the command and get output
+    let l:output = system(l:cmd)
+
+    " Clear PGPASSWORD for security
+    let $PGPASSWORD = ''
+
+    " Open results in a new buffer
+    below new
+    setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
+
+    " Format and display the output
+    let l:formatted_output = FormatSqlOutput(l:output)
+    call setline(1, l:formatted_output)
+
+    " Set up some nice mappings for the results buffer
+    nnoremap <buffer> q :q<CR>
+    setlocal nomodifiable
+endfunction
+
+" Commands to run SQL
+command! -range=% Rs :<line1>,<line2>call RunSqlSelection()
+
+
+
+
+set incsearch
+set hlsearch
+set ignorecase
+syntax on
