@@ -28,15 +28,22 @@ function! FormatSqlOutput(output)
     let l:columns = split(l:header, '\t')
     let l:widths = map(copy(l:columns), 'len(v:val)')
 
+    " Process data lines to handle NULL values and update widths
     for l:line in l:data
-        let l:fields = split(l:line, '\t')
+        let l:fields = split(l:line, '\t', 1)  " Keep empty fields
         let l:i = 0
         for l:field in l:fields
+            " Convert \N to [NULL] but keep empty strings as is
+            if l:field == '\N'
+                let l:fields[l:i] = '[NULL]'
+            endif
             if l:i < len(l:widths)
-                let l:widths[l:i] = max([l:widths[l:i], len(l:field)])
+                let l:widths[l:i] = max([l:widths[l:i], len(l:fields[l:i])])
             endif
             let l:i += 1
         endfor
+        " Replace the line with processed fields
+        let l:data[index(l:data, l:line)] = join(l:fields, "\t")
     endfor
 
     " Initialize formatted list
@@ -59,7 +66,7 @@ function! FormatSqlOutput(output)
 
     " Format data
     for l:line in l:data
-        let l:fields = split(l:line, '\t')
+        let l:fields = split(l:line, '\t', 1)  " Keep empty fields
         let l:formatted_line = ''
         let l:i = 0
         for l:field in l:fields
@@ -76,6 +83,12 @@ function! FormatSqlOutput(output)
 endfunction
 
 function! RunSqlSelection() range
+    " Check if we're in the table list buffer
+    if &buftype == 'nofile' && exists('b:is_table_list') && b:is_table_list
+        call RunTableQuery()
+        return
+    endif
+
     " Get the selected lines and join them into a single string
     let l:query = join(getline(a:firstline, a:lastline), " ")
 
@@ -83,7 +96,7 @@ function! RunSqlSelection() range
     let $PGPASSWORD = g:db_password
 
     " Build psql command with headers
-    let l:cmd = "psql -h " . g:db_host . " -p " . g:db_port . " -U " . g:db_user . " -d " . g:db_name . " -A -F $'\t' -c " . shellescape(l:query)
+    let l:cmd = "psql -h " . g:db_host . " -p " . g:db_port . " -U " . g:db_user . " -d " . g:db_name . " -A -F $'\t' -P null='\\N' -c " . shellescape(l:query)
 
     " Run the command and get output
     let l:output = system(l:cmd)
@@ -104,12 +117,73 @@ function! RunSqlSelection() range
     setlocal nomodifiable
 endfunction
 
-" Commands to run SQL
+function! ListTables()
+    " Set PGPASSWORD environment variable for authentication
+    let $PGPASSWORD = g:db_password
+
+    " Build table list query
+    let l:query = "SELECT table_name, pg_size_pretty(pg_total_relation_size(quote_ident(table_name))) as size FROM information_schema.tables WHERE table_schema = 'cbownr' ORDER BY pg_total_relation_size(quote_ident(table_name)) DESC"
+
+    " Build psql command
+    let l:cmd = "psql -h " . g:db_host . " -p " . g:db_port . " -U " . g:db_user . " -d " . g:db_name . " -A -F $'\t' -P null='\\N' -c " . shellescape(l:query)
+
+    " Run the command and get output
+    let l:output = system(l:cmd)
+
+    " Clear PGPASSWORD for security
+    let $PGPASSWORD = ''
+
+    " Open results in a new buffer
+    below new
+    setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
+
+    " Set a buffer-local variable to identify this as the table list buffer
+    let b:is_table_list = 1
+
+    " Format and display the output
+    let l:formatted_output = FormatSqlOutput(l:output)
+    call setline(1, l:formatted_output)
+
+    " Set up buffer-specific mappings
+    nnoremap <buffer> q :q<CR>
+    nnoremap <buffer> <CR> :call RunTableQuery()<CR>
+    vnoremap <buffer> <leader>r :Rs<CR>
+    nnoremap <buffer> <leader>r :Rs<CR>
+
+    setlocal nomodifiable
+endfunction
+
+function! RunTableQuery()
+    " Get the table name under the cursor (first column)
+    let l:line = getline('.')
+    let l:table = split(l:line, ' \+')[0]
+
+    " Create and run a SELECT query for this table
+    let l:query = "SELECT * FROM " . l:table . " LIMIT 100"
+    let $PGPASSWORD = g:db_password
+    let l:cmd = "psql -h " . g:db_host . " -p " . g:db_port . " -U " . g:db_user . " -d " . g:db_name . " -A -F $'\t' -P null='\\N' -c " . shellescape(l:query)
+    let l:output = system(l:cmd)
+    let $PGPASSWORD = ''
+
+    " Open results in a new buffer
+    below new
+    setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
+    let l:formatted_output = FormatSqlOutput(l:output)
+    call setline(1, l:formatted_output)
+    nnoremap <buffer> q :q<CR>
+    setlocal nomodifiable
+endfunction
+
+" Commands
 command! -range=% Rs :<line1>,<line2>call RunSqlSelection()
+command! Tables call ListTables()
 
+" Key mappings
+vnoremap <leader>r :Rs<CR>
+nnoremap <leader>r :Rs<CR>
+nnoremap <leader>t :Tables<CR>
 
-
-
+" General settings
 set incsearch
 set hlsearch
 set ignorecase
