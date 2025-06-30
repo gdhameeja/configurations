@@ -1,0 +1,38 @@
+function! RunScalaSelection()
+    " Get the selected lines and join them into a single string
+    let l:code = join(getline("'<", "'>"), "\n")
+    " Create a temporary directory
+    let l:tempdir = tempname()
+    " Define the Scala source file path within the temporary directory
+    let l:tmpfile = l:tempdir . "/code.scala"
+    call mkdir(l:tempdir)
+    " Use echo to write the selected Scala code to the temporary .scala file
+    let l:echo_cmd = "echo " . shellescape(l:code) . " > " . shellescape(l:tmpfile)
+    call system(l:echo_cmd)
+    " Define the Scala run command (direct execution)
+    let l:scala_cmd = "scala " . shellescape(l:tmpfile) . " 2>&1"
+    " Run the Scala code using an external shell command
+    let l:output = system(l:scala_cmd)
+    " Filter out compilation messages and ANSI color codes
+    let l:lines = split(l:output, "\n")
+    let l:filtered_lines = []
+    let l:skip_compile_messages = 1
+    for line in l:lines
+        " Remove ANSI color codes
+        let l:clean_line = substitute(line, '\e\[[0-9;]*m', '', 'g')
+        " Skip compilation messages
+        if l:clean_line =~ '^Compiling project' || l:clean_line =~ '^Compiled project' || l:clean_line =~ '^\[error\].*No main class found'
+            continue
+        endif
+        " Include everything else
+        call add(l:filtered_lines, l:clean_line)
+    endfor
+    " Clean up the temporary directory and its contents
+    call delete(l:tmpfile)
+    call delete(l:tempdir)
+    " Open a new window and display the filtered output
+    below new
+    setlocal buftype=nofile bufhidden=wipe noswapfile
+    call setline(1, l:filtered_lines)
+endfunction
+command! -range=% Rs :<line1>,<line2>call RunScalaSelection()
