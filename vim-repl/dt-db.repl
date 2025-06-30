@@ -1,0 +1,310 @@
+" Load JSON configuration based on environment
+function! LoadDbConfig(env)
+    let l:config_file = expand('%:p:h') . '/db_config.json'
+    if !filereadable(l:config_file)
+        echoerr "Configuration file not found: " . l:config_file
+        return 0
+    endif
+
+    " Read and parse JSON file
+    let l:json_str = join(readfile(l:config_file), '')
+    let l:configs = json_decode(l:json_str)
+
+    " Check if environment exists in config
+    if !has_key(l:configs, a:env)
+        echoerr "Environment '" . a:env . "' not found in configuration"
+        return 0
+    endif
+
+    " Load configuration for specified environment
+    let l:config = l:configs[a:env]
+    let g:db_host = l:config.host
+    let g:db_port = l:config.port
+    let g:db_user = l:config.username
+    let g:db_password = l:config.password
+    let g:db_name = l:config.database
+
+    echo "Loaded configuration for environment: " . a:env
+    return 1
+endfunction
+
+" Initialize configuration based on command line arguments
+function! InitializeConfig()
+    if argc() >= 2
+        " First argument is the environment
+        let l:env = argv(0)
+        " Second argument is the file to edit
+        let l:file = argv(1)
+
+        if LoadDbConfig(l:env)
+            " Remove the environment argument so Vim doesn't try to edit it
+            execute "argdelete " . l:env
+
+            " If the file doesn't exist, create it
+            if !filereadable(l:file)
+                execute "silent! edit " . l:file
+                " Add a comment header with timestamp
+                call setline(1, '-- SQL queries for ' . l:file . ' - ' . strftime('%Y-%m-%d %H:%M:%S'))
+                call setline(2, '-- Environment: ' . l:env)
+                call setline(3, '')
+                write
+            endif
+
+            " Edit the specified file
+            execute "edit " . l:file
+        else
+            quit
+        endif
+    else
+        echoerr "Usage: vim -u db.repl <environment> <filename>"
+        quit
+    endif
+endfunction
+
+" Call initialization when vim starts
+call InitializeConfig()
+" Your existing functions below this line...
+function! SumList(list)
+    let l:sum = 0
+    for l:item in a:list
+        let l:sum += l:item
+    endfor
+    return l:sum
+endfunction
+
+function! FormatSqlOutput(output)
+    " Split output into lines
+    let l:lines = split(a:output, '\n')
+    if len(l:lines) == 0
+        return ["No results"]
+    endif
+
+    " First line should contain column names
+    let l:header = l:lines[0]
+    let l:data = l:lines[1:]
+
+    " Calculate column widths
+    let l:columns = split(l:header, '\t')
+    let l:widths = map(copy(l:columns), 'len(v:val)')
+
+    " Process data lines to handle NULL values and update widths
+    for l:line in l:data
+        let l:fields = split(l:line, '\t', 1)  " Keep empty fields
+        let l:i = 0
+        for l:field in l:fields
+            " Convert \N to [NULL] but keep empty strings as is
+            if l:field == '\N'
+                let l:fields[l:i] = '[NULL]'
+            endif
+            if l:i < len(l:widths)
+                let l:widths[l:i] = max([l:widths[l:i], len(l:fields[l:i])])
+            endif
+            let l:i += 1
+        endfor
+        " Replace the line with processed fields
+        let l:data[index(l:data, l:line)] = join(l:fields, "\t")
+    endfor
+
+    " Initialize formatted list
+    let l:formatted = []
+
+    " Calculate total width for separator line
+    let l:total_width = SumList(l:widths) + 3 * len(l:widths) - 1
+
+    " Format header
+    call add(l:formatted, repeat('=', l:total_width))
+    let l:header_fields = split(l:header, '\t')
+    let l:header_line = ''
+    let l:i = 0
+    for l:field in l:header_fields
+        let l:header_line .= printf('%-*s | ', l:widths[l:i], l:field)
+        let l:i += 1
+    endfor
+    call add(l:formatted, l:header_line[:-3])
+    call add(l:formatted, repeat('=', l:total_width))
+
+    " Format data
+    for l:line in l:data
+        let l:fields = split(l:line, '\t', 1)  " Keep empty fields
+        let l:formatted_line = ''
+        let l:i = 0
+        for l:field in l:fields
+            if l:i < len(l:widths)
+                let l:formatted_line .= printf('%-*s | ', l:widths[l:i], l:field)
+            endif
+            let l:i += 1
+        endfor
+        call add(l:formatted, l:formatted_line[:-3])
+    endfor
+    call add(l:formatted, repeat('=', l:total_width))
+
+    return l:formatted
+endfunction
+
+function! RunSqlSelection() range
+    " Check if we're in the table list buffer
+    if &buftype == 'nofile' && exists('b:is_table_list') && b:is_table_list
+        call RunTableQuery()
+        return
+    endif
+
+    " Get the selected lines and join them into a single string
+    let l:query = join(getline(a:firstline, a:lastline), " ")
+
+    " Set PGPASSWORD environment variable for authentication
+    let $PGPASSWORD = g:db_password
+
+    " Build psql command with headers
+    let l:cmd = "psql -h " . g:db_host . " -p " . g:db_port . " -U " . g:db_user . " -d " . g:db_name . " -A -F $'\t' -P null='\\N' -c " . shellescape(l:query)
+
+    " Run the command and get output
+    let l:output = system(l:cmd)
+
+    " Clear PGPASSWORD for security
+    let $PGPASSWORD = ''
+
+    " Open results in a new buffer
+    below new
+    setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
+
+    " Format and display the output
+    let l:formatted_output = FormatSqlOutput(l:output)
+    call setline(1, l:formatted_output)
+
+    " Set up some nice mappings for the results buffer
+    nnoremap <buffer> q :q<CR>
+    setlocal nomodifiable
+endfunction
+
+function! ListTables()
+    " Set PGPASSWORD environment variable for authentication
+    let $PGPASSWORD = g:db_password
+
+    " Build table list query
+    let l:query = "SELECT table_name, pg_size_pretty(pg_total_relation_size(quote_ident(table_name))) as size FROM information_schema.tables WHERE table_schema = 'cbownr' ORDER BY pg_total_relation_size(quote_ident(table_name)) DESC"
+
+    " Build psql command
+    let l:cmd = "psql -h " . g:db_host . " -p " . g:db_port . " -U " . g:db_user . " -d " . g:db_name . " -A -F $'\t' -P null='\\N' -c " . shellescape(l:query)
+
+    " Run the command and get output
+    let l:output = system(l:cmd)
+
+    " Clear PGPASSWORD for security
+    let $PGPASSWORD = ''
+
+    " Open results in a new buffer
+    below new
+    setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
+
+    " Set a buffer-local variable to identify this as the table list buffer
+    let b:is_table_list = 1
+
+    " Format and display the output
+    let l:formatted_output = FormatSqlOutput(l:output)
+    call setline(1, l:formatted_output)
+
+    " Set up buffer-specific mappings
+    nnoremap <buffer> q :q<CR>
+    nnoremap <buffer> <CR> :call RunTableQuery()<CR>
+    vnoremap <buffer> <leader>r :Rs<CR>
+    nnoremap <buffer> <leader>r :Rs<CR>
+
+    setlocal nomodifiable
+endfunction
+
+function! RunTableQuery()
+    " Get the table name under the cursor (first column)
+    let l:line = getline('.')
+    let l:table = split(l:line, ' \+')[0]
+
+    " Create and run a SELECT query for this table
+    let l:query = "SELECT * FROM " . l:table . " LIMIT 100"
+    let $PGPASSWORD = g:db_password
+    let l:cmd = "psql -h " . g:db_host . " -p " . g:db_port . " -U " . g:db_user . " -d " . g:db_name . " -A -F $'\t' -P null='\\N' -c " . shellescape(l:query)
+    let l:output = system(l:cmd)
+    let $PGPASSWORD = ''
+
+    " Open results in a new buffer
+    below new
+    setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
+    let l:formatted_output = FormatSqlOutput(l:output)
+    call setline(1, l:formatted_output)
+    nnoremap <buffer> q :q<CR>
+    setlocal nomodifiable
+endfunction
+
+function! GetTableSchema()
+    " Get the table schema under the cursor
+    let l:line = getline('.')
+    let l:table = split(l:line, ' \+')[0]
+
+    " Create and run a SELECT query for this table
+    let l:query = "SELECT * FROM information_schema.columns WHERE table_name = '" . l:table . "' LIMIT 100"
+    let $PGPASSWORD = g:db_password
+    let l:cmd = "psql -h " . g:db_host . " -p " . g:db_port . " -U " . g:db_user . " -d " . g:db_name . " -A -F $'\t' -P null='\\N' -c " . shellescape(l:query)
+    let l:output = system(l:cmd)
+    let $PGPASSWORD = ''
+
+    " Open results in a new buffer
+    below new
+    setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
+    let l:formatted_output = FormatSqlOutput(l:output)
+    call setline(1, l:formatted_output)
+    nnoremap <buffer> q :q<CR>
+    setlocal nomodifiable
+endfunction
+
+
+function! GetTableConstraints()
+    " Get the table name under the cursor
+    let l:line = getline('.')
+    let l:table = split(l:line, ' \+')[0]
+
+    " Create and run a SELECT query for constraints
+    let l:query = "SELECT conname AS constraint_name, "
+    let l:query .= "CASE contype "
+    let l:query .= "WHEN 'p' THEN 'Primary Key' "
+    let l:query .= "WHEN 'f' THEN 'Foreign Key' "
+    let l:query .= "WHEN 'u' THEN 'Unique' "
+    let l:query .= "WHEN 'c' THEN 'Check' "
+    let l:query .= "WHEN 'x' THEN 'Exclusion' "
+    let l:query .= "END AS constraint_type, "
+    let l:query .= "conrelid::regclass AS table_name, "
+    let l:query .= "a.attname AS column_name, "
+    let l:query .= "pg_get_constraintdef(c.oid) AS constraint_definition "
+    let l:query .= "FROM pg_constraint c "
+    let l:query .= "LEFT JOIN pg_attribute a ON a.attnum = ANY(c.conkey) AND a.attrelid = c.conrelid "
+    let l:query .= "WHERE conrelid = '" . l:table . "'::regclass;"
+
+    " Set PostgreSQL password temporarily
+    let $PGPASSWORD = g:db_password
+    let l:cmd = "psql -h " . g:db_host . " -p " . g:db_port . " -U " . g:db_user . " -d " . g:db_name . " -A -F $'\t' -P null='\\N' -c " . shellescape(l:query)
+    let l:output = system(l:cmd)
+    let $PGPASSWORD = ''
+
+    " Open results in a new buffer
+    below new
+    setlocal buftype=nofile bufhidden=wipe noswapfile nowrap
+    let l:formatted_output = FormatSqlOutput(l:output)
+    call setline(1, l:formatted_output)
+    nnoremap <buffer> q :q<CR>
+    setlocal nomodifiable
+endfunction
+
+
+" Commands
+command! -range=% Rs :<line1>,<line2>call RunSqlSelection()
+command! Tables call ListTables()
+command! -range=% Schema :<line1>,<line2>call GetTableSchema()
+command! -range=% Constraints :<line1>,<line2>call GetTableConstraints()
+
+" Key mappings
+vnoremap <leader>r :Rs<CR>
+nnoremap <leader>r :Rs<CR>
+nnoremap <leader>t :Tables<CR>
+
+" General settings
+set incsearch
+set hlsearch
+set ignorecase
+syntax on
